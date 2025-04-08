@@ -1,0 +1,4 @@
+requests
+python-dotenv
+openai==1.8.0
+
