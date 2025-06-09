@@ -1,0 +1,96 @@
+.chat-container {
+  overflow-y: auto; /* Allows vertical scrolling if content exceeds height */
+  flex: 1; /* Make the chat container responsive within the flexbox layout */
+  max-width: 100%; /* Ensure it doesn't exceed the parent's width */
+  height: 100%; /* Take up the full height of the parent container */
+  margin: 0; /* Remove auto margins to fit within the flexbox */
+  border: 1px solid #ddd; /* Adds a light gray border around the container */
+  border-radius: 12px; /* Rounds the corners of the container */
+  display: flex; /* Enables flexbox layout for the container */
+  flex-direction: column; /* Arranges child elements in a column layout */
+  background-color: #fff; /* Sets the background color of the container to white */
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08); /* Adds a subtle shadow effect for depth */
+}
+
+.chat-messages {
+  flex: 1; /* Allows the messages area to grow and fill available space */
+  padding: 16px; /* Padding inside the messages area */
+  overflow-y: auto; /* Allows vertical scrolling if messages exceed height */
+  border-bottom: 1px solid #eee; /* Light border at the bottom of the messages area */
+  background: #fdfdfd; /* Light background for messages */
+}
+
+.placeholder-text {
+  position: absolute; /* Position the placeholder text absolutely */
+  left: 12px; /* Adjust left position to match input padding */
+  top: 50%; /* Center vertically */
+  transform: translateY(-50%); /* Adjust for vertical centering */
+  color: #888; /* Placeholder text color */
+  pointer-events: none; /* Prevent interaction with the placeholder */
+  transition: opacity 0.2s; /* Smooth transition for showing/hiding */
+}
+
+.chat-input-area {
+  display: flex; /* Use flexbox to arrange buttons and input */
+  align-items: center; /* Center items vertically */
+  padding: 10px; /* Padding inside the input area */
+  border-top: 1px solid #eee; /* Light border at the top of the input area */
+  background-color: #ffffff; /* White background for input area */
+}
+
+.chat-input {
+  flex: 1; /* Allow the input area to grow and fill available space */
+  min-height: 40px; /* Minimum height for the input area */
+  border: 1px solid #000000; /* Border around the input area */
+  border-radius: 4px; /* Rounded corners */
+  padding: 8px; /* Padding inside the input area */
+  outline: none; /* Remove default outline */
+  white-space: pre-wrap; /* Allow wrapping and respect whitespace */
+  overflow-y: auto; /* Allow vertical scrolling if content exceeds height */
+  margin: 0 10px; /* Add margin to the left and right for spacing */
+}
+
+.upload-btn, .send-btn {
+  width: 80px; /* Fixed width for the buttons */
+  height: 40px; /* Fixed height for the buttons */
+  background-color: #000913; /* Button background color */
+  border: none; /* Remove default border */
+  border-radius: 4px; /* Rounded corners for buttons */
+  color: white; /* Button text color */
+  cursor: pointer; /* Pointer cursor on hover */
+  display: flex; /* Use flexbox to center the icon */
+  align-items: center; /* Center vertically */
+  justify-content: center; /* Center horizontally */
+}
+
+.upload-btn {
+  margin-right: 10px; /* Space between the upload button and the input area */
+}
+
+.send-btn {
+  margin-left: 10px; /* Space between the send button and the input area */
+}
+
+.upload-btn:hover, .send-btn:hover {
+  background-color: #b9c9db; /* Darker shade on hover */
+}
+
+.hidden {
+  display: none; /* Hide the placeholder when there is text */
+}
+
+/* Media Query for Smaller Screens */
+@media (max-width: 600px) {
+  .chat-container {
+    flex: 1; /* Ensure it adjusts within the flexbox layout */
+    height: auto; /* Allow height to adjust dynamically */
+  }
+
+  .chat-input {
+    min-height: 35px; /* Adjust minimum height for smaller screens */
+  }
+
+  .upload-btn, .send-btn {
+    width: 70px; /* Adjust button width for smaller screens */
+  }
+}

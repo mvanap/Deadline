@@ -1,0 +1,86 @@
+/* Navbar.css */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #ddd;
+  align-self: auto;
+  align-items: center;
+
+}
+
+.navbar-heading {
+  flex-grow: 1; /* Allows the heading to take up available space */
+  text-align: center; /* Centers the text */
+  margin: 0; /* Removes default margin */
+}
+
+/* Login, Signup, Profile icons */
+.navbar-buttons {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+/* Navbar.css */
+.navbar-button {
+  padding: 8px 16px; /* Ensure consistent padding */
+  background-color: #010913; /* Button background color */
+  color: white; /* Text color */
+  border: none; /* Remove default button border */
+  border-radius: 6px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  font-weight: 500; /* Font weight */
+  font-size: 16px; /* Ensure consistent font size */
+  line-height: 1.5; /* Adjust line height for better vertical alignment */
+}
+
+/* Optional: Add hover effect */
+.navbar-button:hover {
+  background-color: #f39970; /* Darker shade on hover */
+}
+
+/* Profile dropdown styles */
+.profile-dropdown {
+  position: absolute;
+  top: 60px;
+  right: 0;
+  background-color: #faf6f6;
+  border: 2px solid #251c1c;
+  box-shadow: 0px 2px 6px rgb(194, 190, 190);
+  border-radius: 5px;
+  padding: 10px;
+  max-width: 200px;
+  max-height: 200px;
+  width: auto;
+  height: auto;
+  z-index: 10;
+}
+
+.profile-dropdown p {
+  margin: 0;
+  padding: 20px 0px;
+  cursor: pointer;
+}
+
+.profile-dropdown p:hover {
+  background-color: #f2f2f2;
+}
+
+.profile-dropdown button {
+  background: none; /* Remove default button background */
+  border: none; /* Remove default button border */
+  color: #000305; /* Text color */
+  font-size: 16px; /* Adjust font size */
+  cursor: pointer; /* Change cursor to pointer */
+  padding: 10px; /* Add padding for better click area */
+  text-align: left; /* Align text to the left */
+  width: 100%; /* Make button take full width */
+}
+
+.profile-dropdown button:hover {
+  background-color: #bd7a7a; /* Change background on hover */
+  border-radius: 3px;
+  
+}

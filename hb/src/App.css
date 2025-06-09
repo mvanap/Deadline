@@ -1,19 +1,37 @@
-/* App.css */
-
 body {
-
   margin: 0;
-
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-
   background-color: #f0f2f5;
-
+  overflow: hidden; /* Prevent scrolling on the body */
 }
- 
+
 .app-container {
-
-  padding: 20px;
-
+  display: flex; /* Use flexbox for layout */
+  height: 100vh; /* Full height of the viewport */
+  width: 100%; /* Full width of the viewport */
 }
 
- 
+.vertical-line {
+  width: 5px; /* Width of the vertical line */
+  background-color: #070000; /* Color of the line */
+  height: 100%; /* Full height of the container */
+}
+
+.content {
+  flex: 2; /* Take up 30% of the available space */
+  padding: 20px; /* Add some padding */
+  overflow-y: auto; /* Allow scrolling if content overflows */
+  background-color: #f9f9f9; /* Background color for the content area */
+}
+
+.chat-container {
+  top: 0%;
+  flex: 8; /* Take up 70% of the available space */
+  padding: 30px; /* Add some padding */
+  overflow-y: auto; /* Allow scrolling if content overflows */
+  background-color: #fff; /* Background color for the chat container */
+  box-shadow: 0 0px 15px rgba(0, 0, 0, 0.08); /* Adds a subtle shadow effect */
+  border-left: 1px solid #ddd; /* Optional: Light border for separation */
+  border-radius: 5px;
+  bottom: 0%;
+}

@@ -1,23 +1,22 @@
-
-import openai
-from dotenv import load_dotenv 
-from openai import AzureOpenAI
 import os
-import json
+import openai
+from dotenv import load_dotenv
 
+# Load environment variables from .env file
 load_dotenv()
-OPENAI_API_VERSION = os.getenv("OPENAI_API_VERSION") 
 
-#For app user: you need to pass the version configured by the admin 
+# Set up Azure OpenAI credentials
+AZURE_API_KEY = os.getenv('AZURE_OPENAI_API_KEY')
+AZURE_ENDPOINT = os.getenv('AZURE_OPENAI_ENDPOINT')
+AZURE_API_VERSION = os.getenv('AZURE_OPENAI_API_VERSION')
+AZURE_MODEL_NAME = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME')  # e.g., "gpt-35-turbo" or "gpt-4o"
  
-AZURE_OPENAI_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT") #Eg: {BASE_URL}/api/azureai 
-
-AZURE_OPENAI_API_KEY = os.getenv("AZURE_OPENAI_API_KEY") 
-
-
-#For App User: use the app-registration key along with the app configuration unique key name eg. app123key-configName, For Api User: Substitute the key generated from Key Config Panel 
- 
-client = AzureOpenAI() 
+# Initialize OpenAI API
+openai.api_type = "azure"
+openai.api_base = AZURE_ENDPOINT
+openai.api_version = AZURE_API_VERSION
+openai.api_key = AZURE_API_KEY
+openai.api_model = AZURE_MODEL_NAME
 
 def initialize_conversation():
     '''
@@ -107,56 +106,21 @@ def initialize_conversation():
     conversation = [{"role":"system", "content": system_message}]
     return conversation
 
-# Define a function called moderation_check that takes user_input as a parameter.
-
-def moderation_check(user_input):
-    # Call the OpenAI API to perform moderation on the user's input.
-    response = openai.moderations.create(input=user_input)
-    response = client.chat.completions.create(
-                model = "gpt-4o-mini",
-                messages= [{'role' : 'user', 'content' : str(user_input)}],
-                temperature=0,
-                max_tokens=900
-            )
-    response = response.prompt_filter_results[0]['content_filter_results']
-    if not response['hate']['severity'] == 'safe':
-         return 'Flagged'
-    if not response['jailbreak']['detected'] == False:
-         return 'Flagged'
-    if not response['self_harm']['severity'] == 'safe':
-         return 'Flagged'
-    if not response['sexual']['severity'] == 'safe':
-         return 'Flagged'
-    if not response['violence']['severity'] == 'safe':
-         return 'Flagged'
-    return 'Not Flagged'
-
-def get_chat_completions(input, json_format=False):
-    MODEL = 'gpt-4o-mini'
-    system_message_json_output = """<<. Return output in JSON format to the key output.>>"""
+# Function to generate a response using Azure OpenAI
+def get_response(conversation):
     
-    if json_format:
-        input[0]['content'] += system_message_json_output
+    try:
+        # Create a chat completion request
+        response = openai.ChatCompletion.create(
+        engine=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME'),  # Use the deployment name
+        messages=conversation,   #PAss the full conversation to history
+        temperature=0.7,
+        max_tokens=1000,
+        top_p=0.6,
+        frequency_penalty=0.7
+        )
+        return response.choices[0].message.content
 
-        try:
-            chat_completion_json = client.chat.completions.create(
-                model=MODEL,
-                messages=input
-            )
-            output = json.loads(chat_completion_json.choices[0].message.content)
-        except Exception as e:
-            print(f"Error in API call: {e}")
-            return None
-
-    else:
-        try:
-            chat_completion = client.chat.completions.create(
-                model=MODEL,
-                messages=input
-            )
-            output = chat_completion.choices[0].message.content
-        except Exception as e:
-            print(f"Error in API call: {e}")
-            return None
-
-    return output
+    except Exception as e:
+        print(f"HealthBuddy: An error occurred while generating a response: {e}")
+        return "I'm sorry, I couldn't process your request at the moment."

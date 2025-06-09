@@ -7,7 +7,9 @@ function Signup() {
         <form>
             <input type="text" placeholder="Name" /><br />
             <input type="email" placeholder="Email" /><br />
-            <input type="password" placeholder="Password" /><br />
+            <input type="password" placeholder="Create Password" /><br />
+            <input type="password" placeholder="Re-Enter Password" /><br />
+            <input type="date" placeholder='Date of Birth' /><br />
             <button type="submit">Sign Up</button>
         </form>
     </div>
