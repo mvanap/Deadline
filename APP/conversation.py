@@ -1,10 +1,11 @@
 import os
 import openai
 from dotenv import load_dotenv
-
+from langchain_openai import AzureChatOpenAI
+ 
 # Load environment variables from .env file
 load_dotenv()
-
+ 
 # Set up Azure OpenAI credentials
 AZURE_API_KEY = os.getenv('AZURE_OPENAI_API_KEY')
 AZURE_ENDPOINT = os.getenv('AZURE_OPENAI_ENDPOINT')
@@ -17,14 +18,14 @@ openai.api_base = AZURE_ENDPOINT
 openai.api_version = AZURE_API_VERSION
 openai.api_key = AZURE_API_KEY
 openai.api_model = AZURE_MODEL_NAME
-
+ 
 def initialize_conversation():
     '''
     Returns a list [{"role": "system", "content": system_message}]
     '''
-
+ 
     delimiter = "####"
-
+ 
     example_user_dict = {
         'Symptoms': 'Headache and nausea',
         'Duration': '2 days',
@@ -33,7 +34,7 @@ def initialize_conversation():
         'Medical history': 'No chronic conditions',
         'Next steps': 'Consult a doctor if symptoms persist'
     }
-
+ 
     example_user_req = {
         'Symptoms': 'Cough and fever',
         'Duration': '3 days',
@@ -42,7 +43,7 @@ def initialize_conversation():
         'Medical history': 'Asthma',
         'Next steps': 'Consider seeing a healthcare provider'
     }
-    
+   
     system_message = f"""
     You are an intelligent medical assistant designed to help users with health-related inquiries and provide guidance based on their symptoms and medical history.
     Your goal is to ask relevant questions to understand the user's health profile and provide appropriate advice or next steps.
@@ -61,7 +62,7 @@ def initialize_conversation():
     - 'Medical history' should summarize any relevant past medical conditions.
     - 'Next steps' should provide appropriate advice based on the user's input.
     {delimiter}
-
+ 
     To fill the dictionary, you need to have the following chain of thoughts:
     Follow the chain-of-thoughts below and only output the final updated python dictionary for the keys as described in {example_user_req}. \n
     {delimiter}
@@ -72,7 +73,7 @@ def initialize_conversation():
     Remember the instructions around the values for the different keys.
     If the necessary information has been extracted, only then proceed to the next step. \n
     Otherwise, rephrase the question to capture their profile clearly. \n
-
+ 
     {delimiter}
     Thought 2: If the user uploads an image or PDF, extract relevant information from the document. \n
     Ask the user to upload their medical reports or prescriptions, and inform them that you will analyze the document to gather additional information.
@@ -82,12 +83,12 @@ def initialize_conversation():
     - "What specific health condition are you concerned about based on your report?"
     Remember the instructions around the values for the different keys.
     {delimiter}
-
+ 
     {delimiter}
     Thought 3: Check if you have correctly updated the values for the different keys in the python dictionary.
     If you are not confident about any of the values, ask clarifying questions.
     {delimiter}
-
+ 
     {delimiter}
     Here is a sample conversation between the user and assistant:
     User: "Hi, I have a headache and feel nauseous."
@@ -98,29 +99,34 @@ def initialize_conversation():
     Buddy: "If you have any medical reports or prescriptions, feel free to upload them, and I can help analyze the information."
     User: "Here is my prescription."
     Assistant: "{example_user_dict}"
-    
+   
     {delimiter}
-    
-    Start with a welcome message and encourage the user to share their requirements. 
+   
+    Start with a welcome message and encourage the user to share their requirements.
     """
     conversation = [{"role":"system", "content": system_message}]
     return conversation
-
+ 
 # Function to generate a response using Azure OpenAI
 def get_response(conversation):
-    
+   
     try:
         # Create a chat completion request
-        response = openai.ChatCompletion.create(
-        engine=os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME'),  # Use the deployment name
-        messages=conversation,   #PAss the full conversation to history
+        llm = AzureChatOpenAI(
+        azure_deployment=AZURE_MODEL_NAME,
+        api_key=AZURE_API_KEY,
+        azure_endpoint=AZURE_ENDPOINT,
+        api_version=AZURE_API_VERSION,  # Use the deployment name
+           #PAss the full conversation to history
         temperature=0.7,
         max_tokens=1000,
         top_p=0.6,
         frequency_penalty=0.7
         )
-        return response.choices[0].message.content
-
+        messages = conversation,
+        response = llm.invoke(conversation)
+        return response.content
+ 
     except Exception as e:
         print(f"HealthBuddy: An error occurred while generating a response: {e}")
         return "I'm sorry, I couldn't process your request at the moment."

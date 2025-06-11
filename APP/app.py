@@ -23,7 +23,7 @@ openai.api_base = AZURE_ENDPOINT
 openai.api_version = AZURE_API_VERSION
 openai.api_key = AZURE_API_KEY
 openai.api_model = AZURE_MODEL_NAME
-
+ 
 # Initialize the conversation
 conversation = initialize_conversation()
 introduction = get_response(conversation)
@@ -67,18 +67,21 @@ async def upload_file(file: UploadFile = File(...)):
  
         global vectorstore
         vectorstore = gen_embedding(chunked_docs)
+        # After successfully generating the vectorstore
         if not vectorstore:
             return JSONResponse(status_code=500, content={"message": "Failed to create embeddings."})
- 
         # Log vectorstore status
         print(f"Vectorstore populated: {vectorstore is not None}")
- 
+        # ✅ Store vectorstore using filename
+        file_vectorstores[file.filename] = vectorstore
         return {"message": "File uploaded and processed successfully."}
+ 
+ 
     except Exception as e:
         print(f"Error during file upload: {e}")
         return JSONResponse(status_code=500, content={"message": f"Upload failed: {e}"})
  
-
+ 
 # Define the request schema
 class ChatRequest(BaseModel):
     message: str  # The user's message
@@ -94,17 +97,15 @@ async def chat(request: ChatRequest):
     user_input = request.message
     print(f"Received message: {user_input}")
  
-    # Check if user input contains a known filename
-    for filename in file_vectorstores:
-        if filename.lower() in user_input.lower():
-            vectorstore = file_vectorstores[filename]
-            response = rag_response(user_input, vectorstore)
-            return {
-                "You": user_input,
-                "HealthBuddy": response
-            }
+    global vectorstore
+    if vectorstore:
+        response = rag_response(user_input, vectorstore)
+        return {
+            "You": user_input,
+            "HealthBuddy": response
+        }
  
-    # Default to LLM if no filename matched
+    # If vectorstore is not available, fallback to GPT chat
     conversation.append({"role": "user", "content": user_input})
     try:
         response = get_response(conversation)
@@ -115,7 +116,10 @@ async def chat(request: ChatRequest):
         }
     except Exception as e:
         print(f"Error generating response: {e}")
-        return {"You": user_input, "HealthBuddy": "Sorry, something went wrong at backend."}
+        return {
+            "You": user_input,
+            "HealthBuddy": "Sorry, something went wrong at backend."
+        }
  
  
 if __name__ == "__main__":

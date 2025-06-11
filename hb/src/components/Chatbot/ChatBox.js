@@ -60,7 +60,7 @@ const ChatBox = () => {
     const handleUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-     
+   
         const fileExtension = file.name.split('.').pop().toLowerCase();
         if (fileExtension !== 'pdf') {
             setMessages(prevMessages => [
@@ -69,42 +69,43 @@ const ChatBox = () => {
             ]);
             return;
         }
-     
+   
         const formData = new FormData();
         formData.append('file', file);
-     
+   
         try {
             const res = await fetch('http://localhost:8000/upload', {
                 method: 'POST',
                 body: formData
             });
-     
+   
             const data = await res.json();
             console.log("Upload response:", data);
-     
+   
             // Show upload success message
             setMessages(prevMessages => [
                 ...prevMessages,
                 { role: 'assistant', content: '✅ File uploaded' }
             ]);
-     
+           
+   
             // ✅ Automatically ask for a summary
             const summaryRes = await fetch('http://localhost:8000/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ message: "Give a summary of the uploaded file." })
+                body: JSON.stringify({ message: `Give a summary of the uploaded file ${file.name}` })
             });
-     
+   
             const summaryData = await summaryRes.json();
             console.log("Summary response:", summaryData);
-     
+   
             setMessages(prevMessages => [
                 ...prevMessages,
                 { role: 'assistant', content: summaryData.HealthBuddy || "Summary not available." }
             ]);
-     
+   
         } catch (err) {
             console.error('Upload error:', err);
             setMessages(prevMessages => [
@@ -114,8 +115,12 @@ const ChatBox = () => {
         }
     };
    
-    const handleInputChange = (e) => {
-        setMessage(e.target.innerText); // Update state with content of the div
+   
+    const handleInputChange = () => {
+        if (inputRef.current) {
+            const text = inputRef.current.innerText;
+            setMessage(text);
+        }
     };
  
     const handleKeyDown = (event) => {
@@ -146,9 +151,11 @@ const ChatBox = () => {
                     onKeyDown={handleKeyDown}
                     className="chat-input"
                     style={{ minHeight: '40px', border: '1px solid #ccc', padding: '8px', borderRadius: '4px' }}
-                >
+                    suppressContentEditableWarning={true}
+                >              
                     {message === '' && <span style={{ color: '#aaa' }}>Type your message...</span>}
-                </div>
+                </div>    
+               
                 {/* File Upload Input (hidden) */}
                 <input
                     type="file"
