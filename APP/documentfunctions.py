@@ -6,10 +6,10 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.chains import RetrievalQA
 from langchain.schema import Document
 from langchain_community.document_loaders import PyPDFLoader
-from langchain_community.vectorstores import FAISS
+from langchain.vectorstores import FAISS
 from langchain_community.chat_models import ChatOpenAI
 from dotenv import load_dotenv
-import openai
+import openai, faiss, numpy as np
  
 load_dotenv()
  
@@ -19,6 +19,7 @@ AZURE_API_VERSION = os.getenv('AZURE_OPENAI_API_VERSION')
 AZURE_MODEL_NAME = os.getenv('AZURE_OPENAI_DEPLOYMENT_NAME')
  
 app = FastAPI()
+
  
 # Track processing status and store vectorstores keyed by file_id
 processing_status = {}
@@ -58,25 +59,30 @@ def load_and_chunk(file_path: str) -> Optional[List[Document]]:
     except Exception as e:
         logging.error(f"Error during PDF loading or chunking: {e}")
         return None
- 
-def gen_embedding(chunked_docs: List[Document]) -> Optional[FAISS]:
+
+def gen_embedding(chunked_docs):
     embeddings = []
-    if not chunked_docs:
-        logging.warning("No chunks provided for embeddings.")
-        return None
+    openai.api_key = os.getenv("AZURE_OPENAI_API_KEY")
     try:
-        response = openai.Embedding.create(
-            input=[doc.content for doc in chunked_docs],
-            engine="text-embedding-ada-002"
-        )
+        for chunk in chunked_docs:
+            response = openai.Embedding.create(
+                input= chunk,
+                engine="text-embedding-ada-002"  # Specify the model
+            )
         embeddings.append(response['data'][0]['embedding'])
-        logging.info("Embeddings created")
-        vectorstore = FAISS.from_documents(chunked_docs, embeddings)
-        logging.info(f"Embeddings created for {len(chunked_docs)} chunks.")
-        return vectorstore
+        logging.info("Embeddings has been created and need to be stored in the vector store.")
+        return embeddings
     except Exception as e:
-        logging.error(f"Failed to create embeddings: {e}")
+        logging.error(f"Failed to create embeddings manually: {e}")
         return None
+    
+def store_embeddings(embeddings):
+    dimension = len(embeddings[0])
+    index = faiss.IndexFlatL2(dimension)
+    index.add(np.array(embeddings))
+    logging.info("Embeddings stored in Index")
+    return index
+
  
 def rag_response(user_query: str, vectorstore: Optional[FAISS]) -> str:
     if not user_query:
